@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+IMAGE="${IMAGE:-joncanning/claude-ollama:latest}"
+MODEL="${OLLAMA_MODEL:-glm-5.1:cloud}"
+WORKDIR="/home/agent/workspace"
+OLLAMA_DIR="${OLLAMA_DIR:-$HOME/.ollama-sandbox}"
+CLAUDE_DIR="${CLAUDE_DIR:-$HOME/.claude-sandbox}"
+
+# Persist ollama identity + auth and claude config across runs
+mkdir -p "$OLLAMA_DIR" "$CLAUDE_DIR"
+
+PROMPT="$*"
+if [[ -z "$PROMPT" ]]; then
+  echo "Usage: ./run <prompt>" >&2
+  echo "  e.g. ./run 'refactor the auth module'" >&2
+  echo "" >&2
+  echo "First run: sign in with 'ollama login' inside the container." >&2
+  echo "Auth persists in $OLLAMA_DIR" >&2
+  exit 1
+fi
+
+exec docker run -it --rm \
+  -v "$(pwd):${WORKDIR}" \
+  -v "${OLLAMA_DIR}:/home/agent/.ollama" \
+  -v "${CLAUDE_DIR}:/home/agent/.claude" \
+  -w "$WORKDIR" \
+  -e OLLAMA_MODEL="$MODEL" \
+  -e IS_DEMO=1 \
+  --user "$(id -u):$(id -g)" \
+  --entrypoint bash \
+  "$IMAGE" \
+  -c "OLLAMA_DEBUG=ERROR ollama serve &>/dev/null & disown; until curl -sf http://localhost:11434/api/version >/dev/null 2>&1; do sleep 0.5; done; ollama launch claude --model \"\$OLLAMA_MODEL\" -- --dangerously-skip-permissions --print \"$PROMPT\""
