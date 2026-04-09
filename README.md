@@ -26,7 +26,6 @@ docker build -t joncanning/claude-ollama:latest --push .
 | Variable | Default | Description |
 |---|---|---|
 | `OLLAMA_MODEL` | `glm-5.1:cloud` | Model for `ollama launch` |
-| `IMAGE` | `claude-ollama-alpine` | Docker image to use |
 | `OLLAMA_DIR` | `~/.ollama-sandbox` | Persisted ollama identity + auth |
 | `CLAUDE_DIR` | `~/.claude-sandbox` | Persisted claude config |
 
