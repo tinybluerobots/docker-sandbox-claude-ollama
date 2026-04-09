@@ -22,7 +22,6 @@ USER agent
 WORKDIR /home/agent
 
 # Configurable via environment at runtime
-ENV OLLAMA_API_KEY=""
 ENV OLLAMA_MODEL=""
 
 # Override ollama's default entrypoint to start server + shell
